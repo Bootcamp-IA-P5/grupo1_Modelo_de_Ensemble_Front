@@ -61,7 +61,7 @@ export default function Dashboard() {
       {/* Sidebar lateral */}
       <aside className="w-64 bg-green-700 text-white flex flex-col">
         <div className="p-4 text-2xl font-bold border-b border-green-600">
-          EcoPredict
+          🌿 EcoPredict
         </div>
         <nav className="flex-1 p-4 space-y-2">
           <button
