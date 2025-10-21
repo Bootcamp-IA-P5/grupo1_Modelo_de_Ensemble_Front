@@ -1,6 +1,8 @@
+// Sidebar.jsx (updated)
 import React from "react";
 
-export default function Sidebar({ activeView, setActiveView }) {
+// Accept className prop and apply it to the <aside> element
+export default function Sidebar({ activeView, setActiveView, className = "" }) { 
   const menuItems = [
     { id: "EDA", icon: "📊", label: "EDA" },
     { id: "EDACleanData", icon: "🔥", label: "Clean Data (EDA)" },
@@ -9,12 +11,14 @@ export default function Sidebar({ activeView, setActiveView }) {
   ];
 
   return (
-    <aside className="w-64 bg-green-700 text-white shadow-lg">
+    // Apply the className prop here
+    <aside className={`w-64 bg-green-700 text-white shadow-lg flex-shrink-0 ${className}`}>
       <nav className="p-4 space-y-2">
         {menuItems.map((item) => (
           <button
             key={item.id}
-            onClick={() => setActiveView(item.id)}
+            // Use the passed setActiveView function
+            onClick={() => setActiveView(item.id)} 
             className={`w-full text-left px-4 py-3 rounded-lg transition-colors ${
               activeView === item.id
                 ? "bg-green-500 font-semibold shadow-md"
