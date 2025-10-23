@@ -1,14 +1,15 @@
-// Dashboard.jsx
-import React, { useState } from "react";
-import MainLayout from "../layout/MainLayout";
-import Sidebar from "../components/Sidebar";
-import { VIEWS } from "../config/constants.jsx";
+// src\pages\Dashboard.jsx (CORRECTED AND COMPLETE)
 
-// Component for the mobile menu button (defined here for simplicity)
+import React, { useState } from "react";
+import MainLayout from "../layout/MainLayout.jsx"; 
+import Sidebar from "../components/Sidebar.jsx"; 
+import { VIEWS } from "../config/constants.jsx";
+import PredictionsView from '../components/prediction.jsx'; 
+
+// --- 1. Mobile Menu Button Component (REQUIRED FOR SIDEBAR TOGGLE) ---
 const MobileMenuButton = ({ isOpen, onClick }) => (
   <button
     onClick={onClick}
-    // Fixed position, hidden on screens 'sm' and up
     className="sm:hidden fixed top-4 right-4 z-30 p-3 rounded-full bg-green-700 text-white shadow-lg transition-transform hover:scale-105"
     aria-label="Toggle menu"
   >
@@ -16,10 +17,11 @@ const MobileMenuButton = ({ isOpen, onClick }) => (
   </button>
 );
 
+// ---------------------------------------------------------------------
+
 export default function Dashboard() {
   const [activeView, setActiveView] = useState("EDA");
-  // 1. New state to control sidebar visibility on mobile
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false); // <-- Required for mobile toggle
 
   // Function to handle view change and automatically close sidebar on mobile
   const handleSetActiveView = (view) => {
@@ -28,6 +30,12 @@ export default function Dashboard() {
   };
 
   const renderContent = () => {
+    // Logic to render PredictionsView
+    if (activeView === "Predicciones") {
+      return <PredictionsView />; 
+    }
+
+    // Existing logic for other views
     const view = VIEWS[activeView];
     if (!view) return null;
 
@@ -41,26 +49,23 @@ export default function Dashboard() {
           {view.extra}
           {view.suffix}
         </p>
-        {/* Placeholder for your Maps/Graphics components */}
-        <div className="mt-8 h-96 border border-dashed border-gray-400 flex items-center justify-center">
-            {activeView} Content (Maps/Charts) Placeholder
-        </div>
       </div>
     );
   };
 
   return (
-    <MainLayout>
+    <MainLayout> {/* <-- START of MainLayout (which provides h-screen) */}
+      
       {/* 2. Mobile Menu Button */}
       <MobileMenuButton
         isOpen={isSidebarOpen}
         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
       />
 
-      {/* 3. Sidebar with Responsive Classes */}
+      {/* 3. Sidebar with Responsive Classes (Hidden/Absolute on mobile, Static on PC) */}
       <Sidebar 
         activeView={activeView} 
-        setActiveView={handleSetActiveView} // Use the new handler
+        setActiveView={handleSetActiveView}
         className={`
           ${isSidebarOpen ? 'block' : 'hidden'} 
           sm:block 
@@ -70,21 +75,13 @@ export default function Dashboard() {
       />
 
       {/* 4. Main Content Area */}
-      {/* a. flex-1 overflow-y-auto bg-white: Enables vertical scrolling for content.
-          b. w-full: Takes full width.
-      */}
       <main className="flex-1 overflow-y-auto bg-white w-full">
-        {/*
-            c. Mobile Content Constraint (max-width: 600px equivalent)
-               - max-w-xl: Sets max-width to 36rem (576px) on mobile (default).
-               - mx-auto: Centers the content block horizontally when max-w is active.
-               - sm:max-w-none: Removes the max-width on screens 'sm' and up to use full available space.
-               - overflow-x-auto: Ensures content scrolls horizontally if it exceeds 576px on small screens.
-        */}
+        {/* Mobile max-width constraint wrapper */}
         <div className="max-w-xl mx-auto overflow-x-auto sm:max-w-none">
-          {renderContent()}
+          {renderContent()} 
         </div>
       </main>
-    </MainLayout>
+
+    </MainLayout> /* <-- END of MainLayout */
   );
 }
