@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import MainLayout from "../layout/MainLayout.jsx"; 
 import Sidebar from "../components/Sidebar.jsx"; 
 import { VIEWS } from "../config/constants.jsx";
-import PredictionsView from '../components/prediction.jsx'; 
+import PredictionsView from '../components/Prediction.jsx'; 
 
 // --- 1. Mobile Menu Button Component (REQUIRED FOR SIDEBAR TOGGLE) ---
 const MobileMenuButton = ({ isOpen, onClick }) => (
