@@ -1,3 +1,5 @@
+// src/components/Prediction.jsx
+
 // Import React and the useState hook to manage state (variables that can change)
 import React, { useState, useEffect } from "react";
 // Import axios library to make HTTP requests to your backend
@@ -7,63 +9,75 @@ import { API_BASE_URL } from "../config/constants";
 
 // Define and export your React component
 export default function Predicciones() {
-  // Create state variables using React's useState hook
-  const [prediction, setPrediction] = useState(null); // stores API response data
-  const [loading, setLoading] = useState(false); // shows loading message while waiting
-  const [error, setError] = useState(null); // stores any error message from the API
+    const [prediction, setPrediction] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
-  // useEffect runs automatically when the component is first loaded (mounted)
-  useEffect(() => {
-    handlePredict(); // call the prediction API automatically when user opens this view
-  }, []);
+    // Placeholder data matching the 54 features required by the Forest Cover Type model
+    // This is the structure your FastAPI Pydantic model requires!
+    const SAMPLE_FEATURES = [
+        2596, 51, 3, 258, 0, 510, 221, 232, 148, 6279, // First 10 numerical features
+        // Add 44 more values (e.g., zeros for binary features) to reach 54 elements
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+        0, 0, 0, 0
+    ];
 
-  // Define an async function to call your backend /predict endpoint
-  const handlePredict = async () => {
-    setLoading(true); // show "loading" message
-    setError(null); // clear any previous error
+    useEffect(() => {
+        handlePredict(); 
+    }, []);
 
-    try {
-      // Example data to send — your backend expects certain input fields.
-      // You must send the correct structure that matches your FastAPI model.
-      const inputData = {
-        feature1: 3.5,
-        feature2: 1.2,
-        // add other input fields expected by your backend
-      };
+    const handlePredict = async () => {
+        setLoading(true);
+        setError(null);
 
-      // Send POST request to backend
-      const response = await axios.post(`${API_BASE_URL}/predict`, inputData);
+        try {
+            // CRITICAL: The input data structure must EXACTLY match the PredictRequest Pydantic model
+            const inputData = {
+                features: SAMPLE_FEATURES, // The list of 54 numbers
+                user_id: "demo_user_001", 
+                location: { lat: 40.0, lon: -105.0 }, // Location object
+            };
+            
+            console.log("Sending data to backend:", inputData); // Debug log
 
-      // If the backend returns valid JSON, axios puts it in response.data
-      setPrediction(response.data); // save response in state so we can show it on screen
-    } catch (err) {
-      // If there's any error (connection, invalid data, etc.), handle it
-      setError(err.response?.data?.detail || err.message);
-    } finally {
-      // This code always runs (success or error)
-      setLoading(false); // stop showing the loading message
-    }
-  };
+            const response = await axios.post(`${API_BASE_URL}/predict`, inputData);
 
-  // JSX (what this component renders on the screen)
-  return (
-    <div className="p-6 text-center">
-      <h2 className="text-2xl font-bold mb-4">🔮 Predicciones</h2>
+            setPrediction(response.data);
+        } catch (err) {
+            // Improved error handling to show specific FastAPI validation errors
+            const detail = err.response?.data?.detail 
+                           ? JSON.stringify(err.response.data.detail, null, 2)
+                           : err.message;
+            setError(detail);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-      {/* Show loading message while waiting */}
-      {loading && <p className="mt-4 text-gray-500">Cargando...</p>}
+    // JSX (Your JSX looks correct for displaying the data)
+    return (
+        <div className="p-6 text-center">
+            <h2 className="text-2xl font-bold mb-4">🔮 Predicciones</h2>
 
-      {/* Show error message if API call fails */}
-      {error && <p className="mt-4 text-red-500">Error: {error}</p>}
+            {/* Display a button to manually trigger the prediction */}
+            <button
+                onClick={handlePredict}
+                disabled={loading}
+                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded shadow-md disabled:bg-gray-400 transition duration-150"
+            >
+                {loading ? '🔮 Ejecutando Predicción...' : '✨ Enviar Datos de Prueba y Predecir'}
+            </button>
+            
+            {loading && <p className="mt-4 text-gray-500">Cargando...</p>}
 
-      {/* Show the prediction data if it exists */}
-      {prediction && (
-        <div className="mt-6 p-4 bg-green-100 rounded">
-          <h3 className="font-semibold">Resultado del Modelo:</h3>
-          {/* JSON.stringify formats the JSON nicely */}
-          <pre className="text-left">{JSON.stringify(prediction, null, 2)}</pre>
+            {error && <pre className="mt-4 p-2 bg-red-100 text-left text-red-500 border border-red-400 rounded">Error: {error}</pre>}
+
+            {prediction && (
+                <div className="mt-6 p-4 bg-green-100 rounded">
+                    <h3 className="font-semibold">Resultado del Modelo:</h3>
+                    <pre className="text-left">{JSON.stringify(prediction, null, 2)}</pre>
+                </div>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 }
